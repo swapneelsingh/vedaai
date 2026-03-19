@@ -1,0 +1,71 @@
+services:
+  # Backend API
+  - type: web
+    name: vedaai-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        fromDatabase:
+          name: vedaai-mongo
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: vedaai-redis
+          type: redis
+          property: connectionString
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+
+  # BullMQ Worker
+  - type: worker
+    name: vedaai-worker
+    env: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm run worker
+    envVars:
+      - key: MONGODB_URI
+        fromDatabase:
+          name: vedaai-mongo
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: vedaai-redis
+          type: redis
+          property: connectionString
+      - key: ANTHROPIC_API_KEY
+        sync: false
+
+  # Frontend
+  - type: web
+    name: vedaai-frontend
+    env: node
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          name: vedaai-backend
+          type: web
+          property: host
+      - key: NEXT_PUBLIC_WS_URL
+        fromService:
+          name: vedaai-backend
+          type: web
+          property: host
+
+databases:
+  - name: vedaai-mongo
+    databaseName: vedaai
+    plan: free
+
+  - name: vedaai-redis
+    plan: free
