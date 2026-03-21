@@ -15,7 +15,9 @@ export function useJobWebSocket({ jobId, onMessage, onError }: UseWebSocketOptio
   const connect = useCallback(() => {
     if (!jobId || !mountedRef.current) return;
 
-    const wsUrl = `${process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:5000'}/ws?jobId=${jobId}`;
+    // const wsUrl = `${process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:5000'}/ws?jobId=${jobId}`;
+    const base = (process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:5000').replace(/\/$/, '');
+    const wsUrl = `${base}/ws?jobId=${jobId}`;
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 

@@ -21,9 +21,12 @@ export default function AssignmentsPage() {
   );
 
   return (
+    // <div className="flex h-screen bg-white overflow-hidden">
+    //   <Sidebar />
+    //   <div className="flex-1 flex flex-col min-w-0 w-full">
     <div className="flex h-screen bg-white overflow-hidden">
-      <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0">
+  <Sidebar />
+  <div className="flex-1 flex flex-col min-w-0 md:ml-0">
         <TopBar title="Home" />
         <main className="flex-1 overflow-y-auto bg-gray-50/50">
           <div className="p-6">

@@ -1,8 +1,8 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GeneratedPaper, QuestionType, Section, Question } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 interface GenerationInput {
   title: string;
@@ -36,7 +36,7 @@ ${qTypeDetails}
 ${input.fileContent ? `Reference Material:\n${input.fileContent.substring(0, 3000)}\n` : ''}
 ${input.additionalInstructions ? `Additional Instructions: ${input.additionalInstructions}` : ''}
 
-Create a comprehensive examination paper. Return ONLY a valid JSON object (no markdown, no explanation) with this exact structure:
+Create a comprehensive examination paper. Return ONLY a valid JSON object (no markdown, no explanation, no code fences) with this exact structure:
 {
   "schoolName": "${input.schoolName || 'Delhi Public School, Sector-4, Bokaro'}",
   "subject": "${input.subject}",
@@ -68,7 +68,7 @@ Rules:
 - Each question must have a complete, accurate answer
 - Questions must be subject-specific, curriculum-aligned, and educationally sound
 - Make questions clear, unambiguous, and appropriately challenging for ${input.className}
-- Return ONLY the JSON, nothing else`;
+- Return ONLY the raw JSON object, no markdown code blocks, no backticks, nothing else`;
 }
 
 export async function generateQuestionPaper(
@@ -80,27 +80,76 @@ export async function generateQuestionPaper(
   const prompt = buildPrompt(input);
   onProgress?.(20);
 
-  const message = await client.messages.create({
-    model: 'claude-opus-4-5',
-    max_tokens: 4096,
-    messages: [{ role: 'user', content: prompt }],
+  // Use gemini-1.5-flash (free tier, fast, generous limits)
+  const model = genAI.getGenerativeModel({ 
+    // model: 'gemini-1.5-flash',
+    // model: 'gemini-2.0-flash',
+    // model: 'gemini-1.5-flash-latest',
+    // model: 'gemini-2.5-flash-preview-04-17',
+    model: 'gemini-2.5-flash',
+    generationConfig: {
+      temperature: 0.7,
+      maxOutputTokens: 4096,
+    },
   });
+
+  onProgress?.(30);
+
+  const result = await model.generateContent(prompt);
+  const rawText = result.response.text();
 
   onProgress?.(70);
 
-  const rawText = message.content
-    .filter((b) => b.type === 'text')
-    .map((b) => (b as { type: 'text'; text: string }).text)
-    .join('');
+  // Strip markdown code fences if Gemini adds them despite instructions
+  // const cleaned = rawText
+  //   .replace(/^```json\s*/i, '')
+  //   .replace(/^```\s*/i, '')
+  //   .replace(/\s*```$/i, '')
+  //   .trim();
 
-  // Extract JSON from response
-  const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+  // // Extract JSON object
+  // const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+  // if (!jsonMatch) throw new Error('AI returned invalid response format');
+
+  // const parsed = JSON.parse(jsonMatch[0]);
+
+  const cleaned = rawText
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/i, '')
+    .replace(/\s*```$/i, '')
+    .trim();
+
+  const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error('AI returned invalid response format');
 
-  const parsed = JSON.parse(jsonMatch[0]);
+  // Fix common JSON issues from AI
+  let jsonStr = jsonMatch[0]
+    .replace(/,\s*}/g, '}')       // trailing comma in objects
+    .replace(/,\s*]/g, ']')       // trailing comma in arrays
+    .replace(/[\u0000-\u001F\u007F-\u009F]/g, ' ') // control characters
+    .replace(/\n/g, ' ')          // newlines inside strings
+    .replace(/\t/g, ' ');         // tabs inside strings
+
+  let parsed;
+  try {
+    parsed = JSON.parse(jsonStr);
+  } catch (e) {
+    // Last resort - truncate to last valid position and close the JSON
+    console.error('JSON parse error, attempting recovery...');
+    // Find last complete question by cutting at last complete object
+    const lastGoodIndex = jsonStr.lastIndexOf(',"answer"');
+    if (lastGoodIndex > 0) {
+      // Find the closing of that answer string
+      const answerEnd = jsonStr.indexOf('"', jsonStr.indexOf(':', lastGoodIndex) + 2);
+      const closeFrom = jsonStr.indexOf('"', answerEnd + 1);
+      jsonStr = jsonStr.substring(0, closeFrom + 1) + '}]}]}';
+    }
+    parsed = JSON.parse(jsonStr);
+  }
+  
   onProgress?.(85);
 
-  // Validate and enrich structure
+  // Validate and build structured paper
   const paper: GeneratedPaper = {
     schoolName: parsed.schoolName || 'Delhi Public School',
     subject: parsed.subject || input.subject,

@@ -83,7 +83,7 @@ export default function AssignmentDetailPage() {
   return (
     <div className="flex h-screen bg-white overflow-hidden">
       <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 w-full">
         <TopBar title="Home" subtitle="Assignment Output" backHref="/assignments" />
         <main className="flex-1 overflow-y-auto bg-gray-50/30">
           <div className="max-w-3xl mx-auto p-6">

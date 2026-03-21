@@ -11,7 +11,8 @@ interface TopBarProps {
 
 export function TopBar({ title, subtitle, backHref, showStatus }: TopBarProps) {
   return (
-    <header className="h-14 border-b border-gray-200 bg-white flex items-center justify-between px-6 shrink-0">
+    // <header className="h-14 border-b border-gray-200 bg-white flex items-center justify-between px-6 shrink-0">
+    <header className="h-14 border-b border-gray-200 bg-white flex items-center justify-between px-6 pl-14 md:pl-6 shrink-0">
       <div className="flex items-center gap-3">
         {backHref && (
           <Link href={backHref} className="text-gray-400 hover:text-gray-600 transition-colors">
