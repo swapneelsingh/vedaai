@@ -80,7 +80,7 @@ export default function AssignmentsPage() {
           </div>
 
           {/* Floating create button */}
-          {assignments.length > 0 && (
+          {/* {assignments.length > 0 && (
             <div className="sticky bottom-6 flex justify-center pb-2">
               <button
                 onClick={() => router.push('/create-assignment')}
@@ -90,7 +90,27 @@ export default function AssignmentsPage() {
                 Create Assignment
               </button>
             </div>
-          )}
+          )} */}
+          {/* Floating create button */}
+{assignments.length > 0 && (
+  <div className="sticky bottom-6 flex justify-center pb-2">
+    <button
+      onClick={() => router.push('/create-assignment')}
+      className="text-white px-6 py-3 rounded-2xl text-sm font-semibold flex items-center gap-2 transition-all duration-150 hover:opacity-90"
+      style={{
+        background: 'linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%)',
+        border: '2px solid #E8570E',
+        boxShadow: '0 0 0 1px #E8570E, 0 4px 15px rgba(232, 87, 14, 0.3)'
+      }}
+    >
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+        <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/>
+        <path d="M19 15l.75 2.25L22 18l-2.25.75L19 21l-.75-2.25L16 18l2.25-.75L19 15z"/>
+      </svg>
+      Create Assignment
+    </button>
+  </div>
+)}
         </main>
       </div>
     </div>
