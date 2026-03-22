@@ -14,10 +14,13 @@ const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/vedaai';
 
 mongoose.connect(MONGO_URI).catch(console.error);
 
-const connection = new IORedis(REDIS_URL, {
-  maxRetriesPerRequest: null,
-  enableReadyCheck: false,
-});
+// const connection = new IORedis(REDIS_URL, {
+//   maxRetriesPerRequest: null,
+//   enableReadyCheck: false,
+// });
+const connection = {
+  url: REDIS_URL,
+};
 
 const worker = new Worker(
   'assignment-generation',
