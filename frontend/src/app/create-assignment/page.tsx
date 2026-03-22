@@ -15,14 +15,14 @@ import { WSMessage } from '../../types';
 import { clsx } from 'clsx';
 
 const QUESTION_TYPES = [
-  'Multiple Choice Questions',
+  // 'Multiple Choice Questions',
   'Short Questions',
   'Long Questions',
-  'Diagram/Graph-Based Questions',
+  // 'Diagram/Graph-Based Questions',
   'Numerical Problems',
   'Fill in the Blanks',
   'True/False Questions',
-  'Match the Following',
+  // 'Match the Following',
 ];
 
 export default function CreateAssignmentPage() {
