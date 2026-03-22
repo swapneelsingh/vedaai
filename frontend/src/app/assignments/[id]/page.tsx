@@ -98,14 +98,14 @@ export default function AssignmentDetailPage() {
                 )}
               </div>
               <div className="flex items-center gap-2">
-                <button
+                {/* <button
                   onClick={handleRegenerate}
                   disabled={isRegenerating}
                   className="btn-ghost text-sm"
                 >
                   {isRegenerating ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
                   Regenerate
-                </button>
+                </button> */}
                 <button
                   onClick={handleExport}
                   disabled={!generatedPaper || isExporting}
