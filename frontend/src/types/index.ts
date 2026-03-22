@@ -18,12 +18,21 @@ export interface Assignment {
   updatedAt: string;
 }
 
+// export interface Question {
+//   id: string;
+//   text: string;
+//   type: string;
+//   difficulty: 'Easy' | 'Moderate' | 'Hard';
+//   marks: number;
+//   answer?: string;
+// }
 export interface Question {
   id: string;
   text: string;
   type: string;
   difficulty: 'Easy' | 'Moderate' | 'Hard';
   marks: number;
+  options?: string[];
   answer?: string;
 }
 

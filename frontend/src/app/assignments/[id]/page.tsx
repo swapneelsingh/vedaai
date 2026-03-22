@@ -217,6 +217,13 @@ function QuestionPaperView({ paper }: { paper: GeneratedPaper }) {
                       <div className="flex-1">
                         <div className="flex items-start justify-between gap-3">
                           <p className="text-sm text-gray-800 leading-relaxed">{q.text}</p>
+{q.options && q.options.length > 0 && (
+  <div className="mt-2 space-y-1">
+    {q.options.map((opt, oi) => (
+      <p key={oi} className="text-sm text-gray-700 pl-3">{opt}</p>
+    ))}
+  </div>
+)}
                           <div className="flex items-center gap-1.5 shrink-0">
                             <span className={clsx(
                               'text-xs px-2 py-0.5 rounded-full font-medium border',

@@ -22,7 +22,55 @@ function buildPrompt(input: GenerationInput): string {
   const totalMarks = input.questionTypes.reduce((sum, q) => sum + q.count * q.marks, 0);
   const totalQuestions = input.questionTypes.reduce((sum, q) => sum + q.count, 0);
 
-  return `You are an expert teacher creating a professional examination paper.
+//   return `You are an expert teacher creating a professional examination paper.
+
+// Assignment Title: ${input.title}
+// Subject: ${input.subject}
+// Class: ${input.className}
+// Total Questions: ${totalQuestions}
+// Total Marks: ${totalMarks}
+
+// Question Structure:
+// ${qTypeDetails}
+
+// ${input.fileContent ? `Reference Material:\n${input.fileContent.substring(0, 3000)}\n` : ''}
+// ${input.additionalInstructions ? `Additional Instructions: ${input.additionalInstructions}` : ''}
+
+// Create a comprehensive examination paper. Return ONLY a valid JSON object (no markdown, no explanation, no code fences) with this exact structure:
+// {
+//   "schoolName": "${input.schoolName || 'Delhi Public School, Sector-4, Bokaro'}",
+//   "subject": "${input.subject}",
+//   "className": "${input.className}",
+//   "timeAllowed": "estimated time (e.g. 45 minutes or 3 hours)",
+//   "maximumMarks": ${totalMarks},
+//   "sections": [
+//     {
+//       "title": "Section A",
+//       "instruction": "Attempt all questions. Each question carries X marks",
+//       "questions": [
+//         {
+//           "id": "unique-id",
+//           "text": "Full question text here",
+//           "type": "Short Questions",
+//           "difficulty": "Easy",
+//           "marks": 2,
+//           "answer": "Complete answer text here"
+//         }
+//       ],
+//       "totalMarks": 20
+//     }
+//   ]
+// }
+
+// Rules:
+// - Group questions by type into sections (Section A, B, C, etc.)
+// - difficulty must be exactly one of: "Easy", "Moderate", "Hard" - distribute evenly
+// - Each question must have a complete, accurate answer
+// - Questions must be subject-specific, curriculum-aligned, and educationally sound
+// - Make questions clear, unambiguous, and appropriately challenging for ${input.className}
+// - Return ONLY the raw JSON object, no markdown code blocks, no backticks, nothing else`;
+
+return `You are an expert teacher creating a professional examination paper.
 
 Assignment Title: ${input.title}
 Subject: ${input.subject}
@@ -36,25 +84,35 @@ ${qTypeDetails}
 ${input.fileContent ? `Reference Material:\n${input.fileContent.substring(0, 3000)}\n` : ''}
 ${input.additionalInstructions ? `Additional Instructions: ${input.additionalInstructions}` : ''}
 
-Create a comprehensive examination paper. Return ONLY a valid JSON object (no markdown, no explanation, no code fences) with this exact structure:
+Return ONLY a valid JSON object, no markdown, no backticks, no explanation:
 {
   "schoolName": "${input.schoolName || 'Delhi Public School, Sector-4, Bokaro'}",
   "subject": "${input.subject}",
   "className": "${input.className}",
-  "timeAllowed": "estimated time (e.g. 45 minutes or 3 hours)",
+  "timeAllowed": "45 minutes",
   "maximumMarks": ${totalMarks},
   "sections": [
     {
       "title": "Section A",
-      "instruction": "Attempt all questions. Each question carries X marks",
+      "instruction": "Attempt all questions.",
       "questions": [
         {
-          "id": "unique-id",
-          "text": "Full question text here",
-          "type": "Short Questions",
+          "id": "q1",
+          "text": "Question text here",
+          "type": "Multiple Choice Questions",
           "difficulty": "Easy",
+          "marks": 1,
+          "options": ["A. option one", "B. option two", "C. option three", "D. option four"],
+          "answer": "A. option one"
+        },
+        {
+          "id": "q2",
+          "text": "Short question here",
+          "type": "Short Questions",
+          "difficulty": "Moderate",
           "marks": 2,
-          "answer": "Complete answer text here"
+          "options": [],
+          "answer": "Answer here"
         }
       ],
       "totalMarks": 20
@@ -63,12 +121,14 @@ Create a comprehensive examination paper. Return ONLY a valid JSON object (no ma
 }
 
 Rules:
-- Group questions by type into sections (Section A, B, C, etc.)
-- difficulty must be exactly one of: "Easy", "Moderate", "Hard" - distribute evenly
-- Each question must have a complete, accurate answer
-- Questions must be subject-specific, curriculum-aligned, and educationally sound
-- Make questions clear, unambiguous, and appropriately challenging for ${input.className}
-- Return ONLY the raw JSON object, no markdown code blocks, no backticks, nothing else`;
+- difficulty must be exactly: "Easy", "Moderate", or "Hard"
+- Group questions by type into sections (Section A, B, C)
+- For Multiple Choice Questions always include exactly 4 options array like ["A. ...", "B. ...", "C. ...", "D. ..."]
+- For all other question types set options as empty array []
+- Every question must have a complete answer
+- For MCQ the answer must be the full correct option text e.g. "A. Paris"
+- Keep answers concise to fit within token limits
+- Return ONLY raw JSON, nothing else`;
 }
 
 export async function generateQuestionPaper(
